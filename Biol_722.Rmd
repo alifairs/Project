@@ -4,13 +4,7 @@ author: "Stephanie Ali Fairbairn"
 date: "30/04/2021"
 output: html_document
 ---
-
----
-title: "RNAseq Differentially Expressed Genes analysis using DESeq2 and edgeR"
-author: "Stephanie Ali Fairbairn"
-date: "30/04/2021"
-output: html_document
----
+**Biology-722 Project**
   
 ```{r, eval= FALSE}
 #Install all required packages
