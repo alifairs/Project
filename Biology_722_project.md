@@ -1,6 +1,11 @@
+---
+title: "RNAseq Differentially Expressed Genes analysis using DESeq2 and edgeR"
+author: "Stephanie Ali Fairbairn"
+date: "30/04/2021"
+---
 **Biology-722 Project**
-
-``` r
+  
+```{r, eval=FALSE}
 #Install all required packages
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager", repos = "https://cran.rstudio.com")
@@ -13,13 +18,13 @@ install.packages("edgeR", repos = "https://cran.rstudio.com")
 install.packages("UpSetR", repos = "https://cran.rstudio.com")
 ```
 
-``` r
+```{r, eval=FALSE}
 # Set working directory
 # setwd("E:/Final_722") # <-- edit this based on the directory of your choice
 # getwd()
 ```
 
-``` r
+```{r, eval=FALSE}
 # Load all required libraries
 library(Rbowtie2)
 library(Rsamtools)
@@ -36,23 +41,25 @@ library(dplyr)
 library(UpSetR)
 ```
 
-``` r
+
+
+```{r, eval=FALSE}
 # All .gz Fastq data files were unzipped using the following
-# gunzip("64A2_APC_R1.fastq.gz")
-# gunzip("64A2_APC_R2.fastq.gz")
-# gunzip("64A3_AK_R1.fastq.gz")
-# gunzip("64A3_AK_R2.fastq.gz")
-# gunzip("66A1_APC_R1.fastq.gz")
-# gunzip("66A1_APC_R2.fastq.gz")
-# gunzip("68A5_AK_R1.fastq.gz")
-# gunzip("68A5_AK_R2.fastq.gz")
-# gunzip("69A1_AK_R1.fastq.gz")
-# gunzip("69A1_AK_R2.fastq.gz")
-# gunzip("71A1_AK_R1.fastq.gz")
-# gunzip("71A1_AK_R2.fastq.gz")
+gunzip("64A2_APC_R1.fastq.gz")
+gunzip("64A2_APC_R2.fastq.gz")
+gunzip("64A3_AK_R1.fastq.gz")
+gunzip("64A3_AK_R2.fastq.gz")
+gunzip("66A1_APC_R1.fastq.gz")
+gunzip("66A1_APC_R2.fastq.gz")
+gunzip("68A5_AK_R1.fastq.gz")
+gunzip("68A5_AK_R2.fastq.gz")
+gunzip("69A1_AK_R1.fastq.gz")
+gunzip("69A1_AK_R2.fastq.gz")
+gunzip("71A1_AK_R1.fastq.gz")
+gunzip("71A1_AK_R2.fastq.gz")
 ```
 
-``` r
+```{r, eval=FALSE}
 # These were done using Mobaxterm
 # Copy all .fastq files from local to remote terminal in Mobaxterm to perform fastqc
 # scp -r <filename>.fastq gradstd1@info.mcmaster.ca:~
@@ -76,13 +83,13 @@ library(UpSetR)
 # GRCm39.primary_assembly.genome.fa.gz
 ```
 
-``` r
+```{r, eval=FALSE}
 # Files were unzipped using gunzip function
 gunzip("gencode.vM26.primary_assembly.annotation.gtf.gz")
 gunzip("GRCm39.primary_assembly.genome.fa.gz")
 ```
 
-``` r
+```{r, eval=FALSE}
  ** Aligning sequence reads to a reference genome**
 
 # Building reference index using Bowtie2
@@ -145,9 +152,11 @@ gunzip("GRCm39.primary_assembly.genome.fa.gz")
 #         seq2 = "71A1_AK_R2_trimmed.fastq",
 #         overwrite = TRUE,
 #         "--threads 8")
+
 ```
 
-``` r
+```{r, eval=FALSE}
+
 # **Using featureCounts to generate a count table**
   
 # Create list with all .sam files for input into featureCounts
@@ -165,7 +174,7 @@ counts <- sorted_counts$counts
 head(counts)
 ```
 
-``` r
+```{r, eval=FALSE}
 # Perform DESeq2 Analysis to obtain differentially expressed genes**
   
 # Check order of sam files in counts data
@@ -211,7 +220,7 @@ deseq_final_df <- as.data.frame(deseq_final)
 deseq_final_df$genes <- row.names(deseq_final_df)
 ```
 
-``` r
+```{r, eval=FALSE}
 # **Creating a Volcano plot to show DEGs**
 # add a column of "Not Sig"
 deseq_final_df$Legend <- "Not Sig"
@@ -222,7 +231,8 @@ deseq_final_df$Legend[deseq_final_df$log2FoldChange < -log2(logfc_threshold) & d
 summary(deseq_final_df)
 ```
 
-``` r
+```{r, eval=FALSE}
+
 # Creating subsets of the final results dataframe to be used later for plots
 deseq_final_subset1 <- subset(deseq_final_df, Legend == "Upreg")
 deseq_final_subset2 <- subset(deseq_final_df, Legend == "Downreg")
@@ -240,7 +250,7 @@ mycolors <- c("red", "green", "grey")
 names(mycolors) <- c("Downreg", "Upreg", "Not Sig")
 ```
 
-``` r
+```{r, eval=FALSE}
 # Creating plot of results for AK vs APC for all DEGs according to DESeq2
 g_deseq = ggplot(deseq_final_df, aes(x=log2FoldChange, y=-log10(padj)), colour=Legend) +
   geom_point(aes(x=log2FoldChange, y=-log10(padj), colour=Legend)) +
@@ -259,7 +269,7 @@ g_deseq
 # End of DESeq2 Analysis
 ```
 
-``` r
+```{r, eval=FALSE}
 #**Preparing to perform edgeR Analysis using featureCounts output**
   
 # Create genotype vector group based on order of sam files
@@ -316,7 +326,7 @@ summary(edgeR_results)
 dim(edgeR_results)
 ```
 
-``` r
+```{r, eval=FALSE}
 #** Creating a volcano plot to show DGEs**
   
 # Setting FDR and logFC limits to obtain DEGs
@@ -331,7 +341,7 @@ edgeR_results$Legend[edgeR_results$logFC > log2(logfc_threshold) & edgeR_results
 edgeR_results$Legend[edgeR_results$logFC < -log2(logfc_threshold) & edgeR_results$FDR < FDR_threshold] <- "Downreg"
 ```
 
-``` r
+```{r, eval=FALSE}
 #Creating subsets of the results dataframe to be used later on for plots
 edgeR_results_subset1 <- subset(edgeR_results, Legend == "Upreg")
 edgeR_results_subset2 <- subset(edgeR_results, Legend == "Downreg")
@@ -343,7 +353,7 @@ edgeR_results_subset4 <- subset(edgeR_results, Legend != "Not Sig")
 edgeR_row_names <- row.names(edgeR_results_subset4)
 ```
 
-``` r
+```{r, eval=FALSE}
 # Create a named vector: the values are the colors to be used, 
 # the names are the categories they will be assigned to
 mycolors <- c("red", "green", "grey")
@@ -367,7 +377,7 @@ g_edgeR
 # End of edgeR Analysis
 ```
 
-``` r
+```{r, eval=FALSE}
 # **Creating a Venn diagram to show overlap**
   
 # Calculating the intersection of the two sets of results from DESeq2 and edgeR to show overlap
@@ -388,7 +398,7 @@ require(gridExtra)
 grid.arrange(gTree(children = venn_plot), top = textGrob("Venn diagram of SE genes", gp=gpar(fontsize=25)))
 ```
 
-``` r
+```{r, eval=FALSE}
 # Preparing upset plot
 DE_list <- list(edgeR = rownames(subset(edgeR_results_subset4, FDR <= FDR_threshold)), DESeq2 = rownames(subset(deseq_final_subset4, padj <= pval_threshold)))
 DE_gns <- fromList(DE_list)
@@ -396,14 +406,14 @@ summary(DE_gns)
 upset(DE_gns, order.by = "freq")
 ```
 
-``` r
+```{r, eval=FALSE}
 # Creating pairwise plot
 DE_df <- merge(edgeR_results_subset4, deseq_final_subset4, by="genes", all=TRUE)
 DE_fc <- data.frame(edgeR = DE_df$logFC, DESeq2 = DE_df$log2FoldChange)
 pairs(DE_fc)
 ```
 
-``` r
+```{r, eval=FALSE}
 # Comparison of differentially expressed genes from results of DESeq2 and edgeR analysis
 merged <- merge(deseq_final_df, edgeR_results, by='genes', all= TRUE)
 with(merged, plot(logFC, log2FoldChange, xlab="logFC edgeR", ylab="log2FC DESeq2", pch=20, col="black", main="Fold change for DESeq2 vs edgeR"))
@@ -412,7 +422,7 @@ with(subset(merged, padj<pval_threshold), points(logFC, log2FoldChange, pch=20, 
 legend("topleft", xjust=1, yjust=1, legend=c("FDR<0.05 edgeR only", "FDR<0.05 DESeq & edgeR", "FDR>0.05"), pch=20, col=c("red", "green", "black"), bty="n", y.intersp = .25)
 ```
 
-``` r
+```{r, eval=FALSE}
 # Getting summaries of logFCs for DESeq2 and edgeR
 summary(deseq_final_subset4$log2FoldChange)
 summary(edgeR_results_subset4$logFC)
@@ -422,17 +432,17 @@ summary(deseq_final_subset4$padj)
 summary(edgeR_results_subset4$FDR)
 ```
 
-``` r
+```{r, eval=FALSE}
 # Comparison of fold change for significantly expressed genes
 boxplot(DE_df$log2FoldChange, DE_df$logFC, main= "Foldchange comparison", names= c("DESeq2","edgeR"), horizontal=TRUE, col= c("sky blue","medium orchid"), las= 2, style="quantile", notch=TRUE)
 ```
 
-``` r
+```{r, eval=FALSE}
 # Comparison of adjusted Pvalue for significantly expressed genes
 boxplot(DE_df$padj, DE_df$FDR, main= "Adjusted Pvalue comparison", names= c("DESeq2","edgeR"), horizontal=TRUE, col= c("sky blue","medium orchid"), las= 2, style="tukey", notch=TRUE)
 ```
 
-``` r
+```{r, eval=FALSE}
 # Creating a histogram comparing fold change for both methods
 edgeR_FC <- DE_df$logFC
 deseq_FC <- DE_df$log2FoldChange
@@ -441,7 +451,7 @@ hist(deseq_FC, breaks=200, col = "sky blue", add=T)
 legend("topright", c("edgeR","DESeq2"), col = c("red", "sky blue"), lwd = 2, bty="n", y.intersp = .25)
 ```
 
-``` r
+```{r, eval=FALSE}
 # Creating a histogram comparing adjusted Pvalue for both methods
 edgeR_FC <- DE_df$padj
 deseq_FC <- DE_df$FDR
@@ -450,7 +460,7 @@ hist(deseq_FC, breaks=200, col = "sky blue", add=T)
 legend("topright", c("edgeR","DESeq2"), col = c("red", "sky blue"), lwd = 2, bty="n", y.intersp = .25)
 ```
 
-``` r
+```{r, eval=FALSE}
 # ** Creating tables to show top 20 upregulated and downregulated genes**
   
 # Create temporary dataframe for DESeq2 SE genes
@@ -490,3 +500,4 @@ temp2 <- temp2[1:20, ]
 Top20_Downreg_logFC_edgeR <- select(temp2, "genes", "FDR", "logFC", "Expression")
 write.csv(Top20_Downreg_logFC_edgeR, "Top20_Downreg_logFC_edgeR.csv")
 ```
+
